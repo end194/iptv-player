@@ -6,6 +6,9 @@
     <title>IPTV Player - Canales Gratis</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
+        /* ============================================================
+           TODOS LOS ESTILOS
+           ============================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -604,21 +607,18 @@
 
     <script>
         // ============================================================
-        // LISTA DE CANALES GRATUITOS QUE FUNCIONAN (ACTUALIZADA)
+        // LISTA DE CANALES GRATUITOS QUE FUNCIONAN (SOLO LOS QUE SIRVEN)
         // ============================================================
         const DEFAULT_CHANNELS = [
             // ============ STREAMS DE PRUEBA (SIEMPRE FUNCIONAN) ============
             { name: '🧪 Apple Test (bipbop)', group: 'Prueba', url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8' },
             { name: '🧪 Mux Test Stream', group: 'Prueba', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
 
-            // ============ CANALES DE NOTICIAS ============
-            { name: '📰 France 24 English', group: 'Noticias', url: 'https://www.france24.fr/en/feeds/stream_hls.m3u8' },
-            { name: '📰 France 24 Français', group: 'Noticias', url: 'https://www.france24.fr/fr/feeds/stream_hls.m3u8' },
+            // ============ CANALES QUE SÍ FUNCIONAN ============
             { name: '📰 CGTN', group: 'Noticias', url: 'https://cgtn-live.cgtn.com/1000e/program/cgtn.m3u8' },
             { name: '📰 Al Jazeera English', group: 'Noticias', url: 'https://live-hls-web-aje.getaj.net/AJE/01.m3u8' },
-            { name: '📰 BBC News', group: 'Noticias', url: 'https://stream-live.bbc.co.uk/news/playlist.m3u8' },
 
-            // ============ CANALES DE MÚSICA ============
+            // ============ CANALES DE MÚSICA (Siempre funcionan) ============
             { name: '🎵 SomaFM Groove Salad', group: 'Música', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
             { name: '🎵 SomaFM Drone Zone', group: 'Música', url: 'https://ice1.somafm.com/dronezone-128-mp3' },
             { name: '🎵 SomaFM Bagel', group: 'Música', url: 'https://ice1.somafm.com/bagel-128-mp3' },
@@ -626,11 +626,13 @@
 
             // ============ CANALES EDUCATIVOS ============
             { name: '📚 NASA TV', group: 'Educativo', url: 'https://ntv1.akamaized.net/hls/live/2013875/NASA-NTV1-HLS/master_2000.m3u8' },
-            { name: '📚 Curiosity Stream', group: 'Educativo', url: 'https://cdn-uw2-prod.tsv2.amagi.tv/linear/amg00844-curiositystreaminc-csdigitalplex/playlist.m3u8' },
 
-            // ============ CANALES GENERALES ============
-            { name: '🌍 Pluto TV - Movies', group: 'Cine', url: 'https://pluto-live.plutotv.net/linear/playlist.m3u8' },
-            { name: '🌍 PBS', group: 'General', url: 'https://www.pbs.org/...' }, // Reemplazar con URL válida
+            // ============ VIDEOS MP4 DE PRUEBA (Siempre funcionan) ============
+            { name: '🎬 Big Buck Bunny (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
+            { name: '🎬 For Bigger Blazes (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
+            { name: '🎬 Elephants Dream (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' },
+            { name: '🎬 Sintel (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4' },
+            { name: '🎬 Tears of Steel (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4' },
         ];
 
         // Lista de listas M3U públicas
@@ -671,7 +673,6 @@
         // INICIALIZACION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Cargar canales por defecto
             loadDefaultChannels();
 
             videoPlayer.addEventListener('timeupdate', updateTimeDisplay);
@@ -701,11 +702,9 @@
             renderChannels();
             setStatus('Canales cargados', 'online');
             statusInfo.textContent = `${channels.length} canales disponibles`;
-            channelCount.textContent = `${channels.length} canales`;
         }
 
         function loadPlaylist() {
-            // Mostrar opciones de listas públicas
             let options = 'Selecciona una lista:\n\n';
             Object.keys(PUBLIC_PLAYLISTS).forEach((key, i) => {
                 options += `  ${i+1}. ${key}\n`;
@@ -835,6 +834,7 @@
                     const idx = channels.indexOf(channel);
                     li.dataset.index = idx;
                     li.dataset.name = channel.name.toLowerCase();
+                    li.dataset.group = group;
                     li.innerHTML = `
                         <span class="indicator"></span>
                         <span class="channel-number">${idx + 1}</span>
@@ -850,7 +850,8 @@
             });
 
             channelCount.textContent = `${total} canales`;
-            applyFilter();
+            // Aplicar filtro inicial
+            filterChannels();
         }
 
         function filterChannels() {
@@ -859,11 +860,16 @@
             let visible = 0;
 
             items.forEach(item => {
+                // Saltar headers de grupo
                 if (item.classList.contains('group-header')) {
                     // Mostrar header solo si hay canales visibles en ese grupo
                     const group = item.textContent.replace('📁 ', '').trim();
-                    const hasVisible = Array.from(item.nextElementSibling ? item.parentElement.children : [])
-                        .some(el => el.dataset.group === group && el.style.display !== 'none');
+                    let hasVisible = false;
+                    // Buscar canales de este grupo
+                    const siblings = item.parentElement.querySelectorAll(`li[data-group="${group}"]`);
+                    siblings.forEach(sib => {
+                        if (sib.style.display !== 'none') hasVisible = true;
+                    });
                     item.style.display = hasVisible ? 'flex' : 'none';
                     return;
                 }
@@ -872,6 +878,18 @@
                 const match = !query || name.includes(query);
                 item.style.display = match ? 'flex' : 'none';
                 if (match) visible++;
+            });
+
+            // Actualizar headers de grupo después de filtrar
+            const headers = channelList.querySelectorAll('.group-header');
+            headers.forEach(header => {
+                const group = header.textContent.replace('📁 ', '').trim();
+                let hasVisible = false;
+                const siblings = header.parentElement.querySelectorAll(`li[data-group="${group}"]`);
+                siblings.forEach(sib => {
+                    if (sib.style.display !== 'none') hasVisible = true;
+                });
+                header.style.display = hasVisible ? 'flex' : 'none';
             });
 
             channelCount.textContent = `${visible} canales`;
@@ -962,7 +980,6 @@
                     playBtn.textContent = '⏸';
                     return;
                 } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                    // Safari nativo
                     videoPlayer.src = url;
                     videoPlayer.play().catch(e => console.error('Error:', e));
                     playBtn.disabled = false;
@@ -1072,12 +1089,12 @@
             const container = videoContainer;
             if (!document.fullscreenElement) {
                 (container.requestFullscreen || container.webkitRequestFullscreen)
-                .call(container)
-                .catch(e => console.error('Error fullscreen:', e));
+                    .call(container)
+                    .catch(e => console.error('Error fullscreen:', e));
             } else {
                 (document.exitFullscreen || document.webkitExitFullscreen)
-                .call(document)
-                .catch(e => console.error('Error exit fullscreen:', e));
+                    .call(document)
+                    .catch(e => console.error('Error exit fullscreen:', e));
             }
         }
 
