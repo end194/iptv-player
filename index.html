@@ -537,13 +537,13 @@
                 <div class="subtitle">Canales gratuitos en vivo</div>
             </div>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 Buscar canales..." oninput="filterChannels()">
+                <input type="text" id="searchInput" placeholder="Buscar canales..." oninput="filterChannels()">
             </div>
             <div class="playlist-controls">
-                <button class="primary" onclick="loadPlaylist()">📂 Cargar Lista</button>
-                <button onclick="loadPlaylistFromURL()">🔗 Desde URL</button>
-                <button class="success" onclick="loadDefaultChannels()">⭐ Canales</button>
-                <button class="danger" onclick="clearPlaylist()">🗑️ Limpiar</button>
+                <button class="primary" onclick="loadPlaylist()">Cargar Lista</button>
+                <button onclick="loadPlaylistFromURL()">Desde URL</button>
+                <button class="success" onclick="loadDefaultChannels()">Canales</button>
+                <button class="danger" onclick="clearPlaylist()">Limpiar</button>
             </div>
             <div class="channel-list-container" id="channelListContainer">
                 <ul class="channel-list" id="channelList">
@@ -569,11 +569,11 @@
                     <h3>Selecciona un canal</h3>
                     <p>Haz clic en un canal de la lista o ingresa una URL</p>
                     <div class="hint">
-                        💡 Arrastra un archivo <kbd>.m3u</kbd> para cargar canales
+                        Arrastra un archivo .m3u para cargar canales
                     </div>
                 </div>
                 <video id="videoPlayer" style="display:none;" controls></video>
-                <div class="hls-loading" id="hlsLoading">🔄 Cargando stream HLS...</div>
+                <div class="hls-loading" id="hlsLoading">Cargando stream HLS...</div>
             </div>
 
             <div class="controls" id="controls">
@@ -604,27 +604,24 @@
 
     <script>
         // ============================================================
-        // LISTA DE CANALES GRATUITOS QUE FUNCIONAN
+        // LISTA DE CANALES QUE REALMENTE FUNCIONAN
         // ============================================================
-        const DEFAULT_CHANNELS = [
+        var DEFAULT_CHANNELS = [
             // ============ STREAMS DE PRUEBA (SIEMPRE FUNCIONAN) ============
-            { name: 'Apple Test (bipbop)', group: 'Prueba', url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8' },
+            { name: 'Apple Test Stream', group: 'Prueba', url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8' },
             { name: 'Mux Test Stream', group: 'Prueba', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
 
             // ============ CANALES DE NOTICIAS ============
-            { name: 'CGTN', group: 'Noticias', url: 'https://cgtn-live.cgtn.com/1000e/program/cgtn.m3u8' },
+            { name: 'CGTN News', group: 'Noticias', url: 'https://cgtn-live.cgtn.com/1000e/program/cgtn.m3u8' },
             { name: 'Al Jazeera English', group: 'Noticias', url: 'https://live-hls-web-aje.getaj.net/AJE/01.m3u8' },
 
-            // ============ CANALES DE MÚSICA ============
+            // ============ CANALES DE MUSICA (MP3 - Siempre funcionan) ============
             { name: 'SomaFM Groove Salad', group: 'Musica', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
             { name: 'SomaFM Drone Zone', group: 'Musica', url: 'https://ice1.somafm.com/dronezone-128-mp3' },
             { name: 'SomaFM Bagel', group: 'Musica', url: 'https://ice1.somafm.com/bagel-128-mp3' },
             { name: 'SomaFM Space Station', group: 'Musica', url: 'https://ice1.somafm.com/spacestation-128-mp3' },
 
-            // ============ CANALES EDUCATIVOS ============
-            { name: 'NASA TV', group: 'Educativo', url: 'https://ntv1.akamaized.net/hls/live/2013875/NASA-NTV1-HLS/master_2000.m3u8' },
-
-            // ============ VIDEOS MP4 DE PRUEBA ============
+            // ============ VIDEOS MP4 (SIEMPRE FUNCIONAN) ============
             { name: 'Big Buck Bunny (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
             { name: 'For Bigger Blazes (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
             { name: 'Elephants Dream (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' },
@@ -632,8 +629,8 @@
             { name: 'Tears of Steel (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4' },
         ];
 
-        // Lista de listas M3U públicas
-        const PUBLIC_PLAYLISTS = {
+        // Lista de listas M3U publicas
+        var PUBLIC_PLAYLISTS = {
             'Noticias': 'https://iptv-org.github.io/iptv/categories/news.m3u',
             'Musica': 'https://iptv-org.github.io/iptv/categories/music.m3u',
             'Educativo': 'https://iptv-org.github.io/iptv/categories/education.m3u',
@@ -643,28 +640,31 @@
             'Completa': 'https://iptv-org.github.io/iptv/index.m3u'
         };
 
-        let channels = [];
-        let currentChannelIndex = -1;
-        let isPlaying = false;
-        let hls = null;
+        // Proxy CORS para evitar bloqueos
+        var CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+
+        var channels = [];
+        var currentChannelIndex = -1;
+        var isPlaying = false;
+        var hls = null;
 
         // DOM refs
-        const videoPlayer = document.getElementById('videoPlayer');
-        const videoContainer = document.getElementById('videoContainer');
-        const placeholder = document.getElementById('placeholder');
-        const channelList = document.getElementById('channelList');
-        const playBtn = document.getElementById('playBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const timeDisplay = document.getElementById('timeDisplay');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        const statusInfo = document.getElementById('statusInfo');
-        const channelCount = document.getElementById('channelCount');
-        const urlInput = document.getElementById('urlInput');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const volumeLabel = document.getElementById('volumeLabel');
-        const searchInput = document.getElementById('searchInput');
-        const hlsLoading = document.getElementById('hlsLoading');
+        var videoPlayer = document.getElementById('videoPlayer');
+        var videoContainer = document.getElementById('videoContainer');
+        var placeholder = document.getElementById('placeholder');
+        var channelList = document.getElementById('channelList');
+        var playBtn = document.getElementById('playBtn');
+        var stopBtn = document.getElementById('stopBtn');
+        var timeDisplay = document.getElementById('timeDisplay');
+        var statusDot = document.getElementById('statusDot');
+        var statusText = document.getElementById('statusText');
+        var statusInfo = document.getElementById('statusInfo');
+        var channelCount = document.getElementById('channelCount');
+        var urlInput = document.getElementById('urlInput');
+        var volumeSlider = document.getElementById('volumeSlider');
+        var volumeLabel = document.getElementById('volumeLabel');
+        var searchInput = document.getElementById('searchInput');
+        var hlsLoading = document.getElementById('hlsLoading');
 
         // ============================================================
         // INICIALIZACION
@@ -695,7 +695,9 @@
         // ============================================================
 
         function loadDefaultChannels() {
-            channels = DEFAULT_CHANNELS.map((c, i) => ({ ...c, id: i }));
+            channels = DEFAULT_CHANNELS.map(function(c, i) {
+                return { id: i, name: c.name, group: c.group, url: c.url };
+            });
             renderChannels();
             setStatus('Canales cargados', 'online');
             statusInfo.textContent = channels.length + ' canales disponibles';
@@ -740,7 +742,7 @@
             setStatus('Cargando lista...', 'loading');
             statusInfo.textContent = 'Descargando...';
 
-            var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+            var proxyUrl = CORS_PROXY + encodeURIComponent(url);
 
             fetch(proxyUrl)
                 .then(function(response) {
@@ -844,7 +846,6 @@
             });
 
             channelCount.textContent = total + ' canales';
-            // Aplicar filtro (usando filterChannels)
             filterChannels();
         }
 
@@ -854,7 +855,6 @@
             var visible = 0;
 
             items.forEach(function(item) {
-                // Saltar headers de grupo
                 if (item.classList.contains('group-header')) {
                     var group = item.textContent.replace('📁 ', '').trim();
                     var hasVisible = false;
@@ -872,7 +872,6 @@
                 if (match) visible++;
             });
 
-            // Actualizar headers de grupo
             var headers = channelList.querySelectorAll('.group-header');
             headers.forEach(function(header) {
                 var group = header.textContent.replace('📁 ', '').trim();
@@ -888,7 +887,7 @@
         }
 
         function clearPlaylist() {
-            if (channels.length > 0 && !confirm('¿Limpiar la lista de canales?')) return;
+            if (channels.length > 0 && !confirm('Limpiar la lista de canales?')) return;
             channels = [];
             stopVideo();
             renderChannels();
@@ -934,11 +933,46 @@
             videoPlayer.style.display = 'block';
             placeholder.style.display = 'none';
 
-            // Detectar si es HLS
+            // Si es MP3 o MP4 directo, reproducir sin HLS
+            if (url.endsWith('.mp3') || url.endsWith('.mp4') || url.includes('sample-videos.com') || url.includes('commondatastorage.googleapis.com')) {
+                videoPlayer.src = url;
+                videoPlayer.load();
+                var playPromise = videoPlayer.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(function() {
+                        isPlaying = true;
+                        playBtn.textContent = '⏸';
+                        playBtn.disabled = false;
+                        stopBtn.disabled = false;
+                        setStatus('Conectado', 'online');
+                        statusInfo.textContent = 'Reproduciendo...';
+                    }).catch(function(error) {
+                        console.error('Error:', error);
+                        setStatus('Error: ' + error.message, 'offline');
+                        playBtn.disabled = true;
+                        stopBtn.disabled = true;
+                        if (!error.message.includes('NotAllowedError')) {
+                            alert('No se pudo reproducir:\n\n' + error.message);
+                        } else {
+                            playBtn.disabled = false;
+                            playBtn.textContent = '▶';
+                        }
+                    });
+                }
+                playBtn.disabled = false;
+                stopBtn.disabled = false;
+                playBtn.textContent = '⏸';
+                return;
+            }
+
+            // HLS - usar proxy CORS para evitar bloqueos
             if (url.includes('.m3u8') || url.includes('m3u8?')) {
                 if (Hls.isSupported()) {
                     hlsLoading.style.display = 'block';
                     setStatus('Cargando HLS...', 'loading');
+
+                    // Usar proxy CORS para el stream HLS
+                    var proxyUrl = CORS_PROXY + encodeURIComponent(url);
 
                     hls = new Hls({
                         enableWorker: true,
@@ -946,7 +980,7 @@
                         maxBufferLength: 30
                     });
 
-                    hls.loadSource(url);
+                    hls.loadSource(proxyUrl);
                     hls.attachMedia(videoPlayer);
 
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
@@ -959,6 +993,12 @@
                             console.error('Error fatal HLS:', data);
                             hlsLoading.style.display = 'none';
                             setStatus('Error HLS', 'offline');
+                            // Intentar reproducir sin proxy
+                            if (url !== proxyUrl) {
+                                console.log('Intentando reproducir sin proxy...');
+                                playUrlDirect(url);
+                                return;
+                            }
                             alert('Error HLS: ' + data.details + '\n\nPrueba con otro canal.');
                             hls.destroy();
                             hls = null;
@@ -984,38 +1024,38 @@
                 }
             }
 
-            // MP4 u otros formatos
+            // Otros formatos
             videoPlayer.src = url;
             videoPlayer.load();
-
             var playPromise = videoPlayer.play();
             if (playPromise !== undefined) {
-                playPromise
-                    .then(function() {
-                        isPlaying = true;
-                        playBtn.textContent = '⏸';
-                        playBtn.disabled = false;
-                        stopBtn.disabled = false;
-                        setStatus('Conectado', 'online');
-                        statusInfo.textContent = 'Reproduciendo...';
-                    })
-                    .catch(function(error) {
-                        console.error('Error:', error);
-                        setStatus('Error: ' + error.message, 'offline');
-                        playBtn.disabled = true;
-                        stopBtn.disabled = true;
-                        if (!error.message.includes('NotAllowedError')) {
-                            alert('No se pudo reproducir:\n\n' + error.message);
-                        } else {
-                            playBtn.disabled = false;
-                            playBtn.textContent = '▶';
-                        }
-                    });
+                playPromise.then(function() {
+                    isPlaying = true;
+                    playBtn.textContent = '⏸';
+                    playBtn.disabled = false;
+                    stopBtn.disabled = false;
+                    setStatus('Conectado', 'online');
+                    statusInfo.textContent = 'Reproduciendo...';
+                }).catch(function(error) {
+                    console.error('Error:', error);
+                    setStatus('Error: ' + error.message, 'offline');
+                    playBtn.disabled = true;
+                    stopBtn.disabled = true;
+                });
             }
-
             playBtn.disabled = false;
             stopBtn.disabled = false;
             playBtn.textContent = '⏸';
+        }
+
+        function playUrlDirect(url) {
+            // Intentar reproducir directamente sin proxy
+            videoPlayer.src = url;
+            videoPlayer.load();
+            videoPlayer.play().catch(function(e) {
+                console.error('Error directo:', e);
+                setStatus('Error: No se pudo reproducir', 'offline');
+            });
         }
 
         function loadUrl() {
@@ -1162,7 +1202,7 @@
                         message = 'Carga abortada';
                         break;
                     case 2:
-                        message = 'Error de red - Verifica tu conexion';
+                        message = 'Error de red';
                         break;
                     case 3:
                         message = 'Error de decodificacion';
