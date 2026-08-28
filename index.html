@@ -6,9 +6,6 @@
     <title>IPTV Player - Canales Gratis</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* ============================================================
-           TODOS LOS ESTILOS
-           ============================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -607,38 +604,38 @@
 
     <script>
         // ============================================================
-        // LISTA DE CANALES GRATUITOS QUE FUNCIONAN (SOLO LOS QUE SIRVEN)
+        // LISTA DE CANALES GRATUITOS QUE FUNCIONAN
         // ============================================================
         const DEFAULT_CHANNELS = [
             // ============ STREAMS DE PRUEBA (SIEMPRE FUNCIONAN) ============
-            { name: '🧪 Apple Test (bipbop)', group: 'Prueba', url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8' },
-            { name: '🧪 Mux Test Stream', group: 'Prueba', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+            { name: 'Apple Test (bipbop)', group: 'Prueba', url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8' },
+            { name: 'Mux Test Stream', group: 'Prueba', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
 
-            // ============ CANALES QUE SÍ FUNCIONAN ============
-            { name: '📰 CGTN', group: 'Noticias', url: 'https://cgtn-live.cgtn.com/1000e/program/cgtn.m3u8' },
-            { name: '📰 Al Jazeera English', group: 'Noticias', url: 'https://live-hls-web-aje.getaj.net/AJE/01.m3u8' },
+            // ============ CANALES DE NOTICIAS ============
+            { name: 'CGTN', group: 'Noticias', url: 'https://cgtn-live.cgtn.com/1000e/program/cgtn.m3u8' },
+            { name: 'Al Jazeera English', group: 'Noticias', url: 'https://live-hls-web-aje.getaj.net/AJE/01.m3u8' },
 
-            // ============ CANALES DE MÚSICA (Siempre funcionan) ============
-            { name: '🎵 SomaFM Groove Salad', group: 'Música', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
-            { name: '🎵 SomaFM Drone Zone', group: 'Música', url: 'https://ice1.somafm.com/dronezone-128-mp3' },
-            { name: '🎵 SomaFM Bagel', group: 'Música', url: 'https://ice1.somafm.com/bagel-128-mp3' },
-            { name: '🎵 SomaFM Space Station', group: 'Música', url: 'https://ice1.somafm.com/spacestation-128-mp3' },
+            // ============ CANALES DE MÚSICA ============
+            { name: 'SomaFM Groove Salad', group: 'Musica', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
+            { name: 'SomaFM Drone Zone', group: 'Musica', url: 'https://ice1.somafm.com/dronezone-128-mp3' },
+            { name: 'SomaFM Bagel', group: 'Musica', url: 'https://ice1.somafm.com/bagel-128-mp3' },
+            { name: 'SomaFM Space Station', group: 'Musica', url: 'https://ice1.somafm.com/spacestation-128-mp3' },
 
             // ============ CANALES EDUCATIVOS ============
-            { name: '📚 NASA TV', group: 'Educativo', url: 'https://ntv1.akamaized.net/hls/live/2013875/NASA-NTV1-HLS/master_2000.m3u8' },
+            { name: 'NASA TV', group: 'Educativo', url: 'https://ntv1.akamaized.net/hls/live/2013875/NASA-NTV1-HLS/master_2000.m3u8' },
 
-            // ============ VIDEOS MP4 DE PRUEBA (Siempre funcionan) ============
-            { name: '🎬 Big Buck Bunny (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
-            { name: '🎬 For Bigger Blazes (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
-            { name: '🎬 Elephants Dream (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' },
-            { name: '🎬 Sintel (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4' },
-            { name: '🎬 Tears of Steel (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4' },
+            // ============ VIDEOS MP4 DE PRUEBA ============
+            { name: 'Big Buck Bunny (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
+            { name: 'For Bigger Blazes (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
+            { name: 'Elephants Dream (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' },
+            { name: 'Sintel (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4' },
+            { name: 'Tears of Steel (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4' },
         ];
 
         // Lista de listas M3U públicas
         const PUBLIC_PLAYLISTS = {
             'Noticias': 'https://iptv-org.github.io/iptv/categories/news.m3u',
-            'Música': 'https://iptv-org.github.io/iptv/categories/music.m3u',
+            'Musica': 'https://iptv-org.github.io/iptv/categories/music.m3u',
             'Educativo': 'https://iptv-org.github.io/iptv/categories/education.m3u',
             'Deportes': 'https://iptv-org.github.io/iptv/categories/sports.m3u',
             'Cine': 'https://iptv-org.github.io/iptv/categories/movies.m3u',
@@ -688,9 +685,9 @@
             videoPlayer.volume = 80 / 100;
             volumeLabel.textContent = '80%';
 
-            console.log('📺 IPTV Player cargado');
-            console.log('ℹ️  Canales cargados:', DEFAULT_CHANNELS.length);
-            console.log('💡 Haz clic en un canal para reproducir');
+            console.log('IPTV Player cargado');
+            console.log('Canales cargados:', DEFAULT_CHANNELS.length);
+            console.log('Haz clic en un canal para reproducir');
         });
 
         // ============================================================
@@ -701,37 +698,37 @@
             channels = DEFAULT_CHANNELS.map((c, i) => ({ ...c, id: i }));
             renderChannels();
             setStatus('Canales cargados', 'online');
-            statusInfo.textContent = `${channels.length} canales disponibles`;
+            statusInfo.textContent = channels.length + ' canales disponibles';
         }
 
         function loadPlaylist() {
-            let options = 'Selecciona una lista:\n\n';
-            Object.keys(PUBLIC_PLAYLISTS).forEach((key, i) => {
-                options += `  ${i+1}. ${key}\n`;
+            var options = 'Selecciona una lista:\n\n';
+            var keys = Object.keys(PUBLIC_PLAYLISTS);
+            keys.forEach(function(key, i) {
+                options += '  ' + (i + 1) + '. ' + key + '\n';
             });
-            options += `\n  ${Object.keys(PUBLIC_PLAYLISTS).length + 1}. Ingresar URL manual\n\n`;
-            options += 'Selecciona una opción:';
+            options += '\n  ' + (keys.length + 1) + '. Ingresar URL manual\n\n';
+            options += 'Selecciona una opcion:';
 
-            const choice = prompt(options);
+            var choice = prompt(options);
             if (choice === null) return;
 
-            const num = parseInt(choice);
-            const keys = Object.keys(PUBLIC_PLAYLISTS);
+            var num = parseInt(choice);
 
             if (num >= 1 && num <= keys.length) {
-                const url = PUBLIC_PLAYLISTS[keys[num - 1]];
+                var url = PUBLIC_PLAYLISTS[keys[num - 1]];
                 loadPlaylistFromURL(url);
             } else if (num === keys.length + 1) {
-                const url = prompt('Ingresa la URL de la lista M3U:');
-                if (url) loadPlaylistFromURL(url);
+                var manualUrl = prompt('Ingresa la URL de la lista M3U:');
+                if (manualUrl) loadPlaylistFromURL(manualUrl);
             } else {
-                alert('Opción inválida');
+                alert('Opcion invalida');
             }
         }
 
         function loadPlaylistFromURL(url) {
             if (!url) {
-                const inputUrl = urlInput.value.trim();
+                var inputUrl = urlInput.value.trim();
                 if (inputUrl && (inputUrl.includes('.m3u') || inputUrl.includes('m3u8'))) {
                     url = inputUrl;
                 } else {
@@ -743,47 +740,46 @@
             setStatus('Cargando lista...', 'loading');
             statusInfo.textContent = 'Descargando...';
 
-            // Usar proxy CORS para evitar bloqueos
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
 
             fetch(proxyUrl)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                .then(function(response) {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
                     return response.text();
                 })
-                .then(data => {
-                    const parsed = parseM3U(data);
+                .then(function(data) {
+                    var parsed = parseM3U(data);
                     if (parsed.length === 0) {
                         throw new Error('No se encontraron canales en la lista');
                     }
                     channels = parsed;
                     renderChannels();
-                    setStatus(`Lista cargada: ${channels.length} canales`, 'online');
-                    statusInfo.textContent = `Lista desde ${new URL(url).hostname}`;
+                    setStatus('Lista cargada: ' + channels.length + ' canales', 'online');
+                    statusInfo.textContent = 'Lista desde ' + new URL(url).hostname;
                     urlInput.value = url;
                 })
-                .catch(error => {
+                .catch(function(error) {
                     console.error('Error:', error);
-                    setStatus(`Error: ${error.message}`, 'offline');
-                    alert(`❌ No se pudo cargar la lista:\n\n${error.message}\n\nIntenta con otra lista.`);
+                    setStatus('Error: ' + error.message, 'offline');
+                    alert('No se pudo cargar la lista:\n\n' + error.message + '\n\nIntenta con otra lista.');
                 });
         }
 
         function parseM3U(data) {
-            const lines = data.split('\n');
-            const result = [];
-            let current = null;
-            let count = 0;
+            var lines = data.split('\n');
+            var result = [];
+            var current = null;
+            var count = 0;
 
-            for (let line of lines) {
-                line = line.trim();
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
                 if (line.startsWith('#EXTINF:')) {
-                    const match = line.match(/#EXTINF:(-?\d+)\s*(?:([^,]+),)?(.*)/);
+                    var match = line.match(/#EXTINF:(-?\d+)\s*(?:([^,]+),)?(.*)/);
                     if (match) {
-                        const name = match[3] || match[2] || `Canal ${count + 1}`;
-                        let group = 'General';
+                        var name = match[3] || match[2] || 'Canal ' + (count + 1);
+                        var group = 'General';
                         if (line.includes('group-title="')) {
-                            const g = line.split('group-title="');
+                            var g = line.split('group-title="');
                             if (g.length > 1) group = g[1].split('"')[0];
                         }
                         current = { id: count++, name: name, group: group, url: '' };
@@ -805,42 +801,40 @@
 
             if (channels.length === 0) {
                 channelList.innerHTML =
-                    `<li style="justify-content:center; color:#444; font-size:13px; padding:40px 20px; text-align:center;">
-                        <div>
-                            <div style="font-size:32px; margin-bottom:12px;">📭</div>
-                            <div>No hay canales cargados</div>
-                            <div style="font-size:11px; color:#333; margin-top:6px;">Carga una lista M3U</div>
-                        </div>
-                    </li>`;
+                    '<li style="justify-content:center; color:#444; font-size:13px; padding:40px 20px; text-align:center;">' +
+                    '<div><div style="font-size:32px; margin-bottom:12px;">📭</div>' +
+                    '<div>No hay canales cargados</div>' +
+                    '<div style="font-size:11px; color:#333; margin-top:6px;">Carga una lista M3U</div></div></li>';
                 channelCount.textContent = '0 canales';
                 return;
             }
 
-            const groups = {};
-            channels.forEach(ch => {
+            var groups = {};
+            channels.forEach(function(ch) {
                 if (!groups[ch.group]) groups[ch.group] = [];
                 groups[ch.group].push(ch);
             });
 
-            let total = 0;
-            Object.keys(groups).sort().forEach(group => {
-                const header = document.createElement('li');
+            var total = 0;
+            var groupNames = Object.keys(groups).sort();
+
+            groupNames.forEach(function(group) {
+                var header = document.createElement('li');
                 header.className = 'group-header';
-                header.textContent = `📁 ${group}`;
+                header.textContent = '📁 ' + group;
                 channelList.appendChild(header);
 
-                groups[group].forEach(channel => {
-                    const li = document.createElement('li');
-                    const idx = channels.indexOf(channel);
+                groups[group].forEach(function(channel) {
+                    var li = document.createElement('li');
+                    var idx = channels.indexOf(channel);
                     li.dataset.index = idx;
                     li.dataset.name = channel.name.toLowerCase();
                     li.dataset.group = group;
-                    li.innerHTML = `
-                        <span class="indicator"></span>
-                        <span class="channel-number">${idx + 1}</span>
-                        <span class="channel-name">${channel.name}</span>
-                        <span class="channel-group">${group}</span>
-                    `;
+                    li.innerHTML =
+                        '<span class="indicator"></span>' +
+                        '<span class="channel-number">' + (idx + 1) + '</span>' +
+                        '<span class="channel-name">' + channel.name + '</span>' +
+                        '<span class="channel-group">' + group + '</span>';
                     li.addEventListener('click', function() {
                         playChannel(parseInt(this.dataset.index));
                     });
@@ -849,50 +843,48 @@
                 });
             });
 
-            channelCount.textContent = `${total} canales`;
-            // Aplicar filtro inicial
+            channelCount.textContent = total + ' canales';
+            // Aplicar filtro (usando filterChannels)
             filterChannels();
         }
 
         function filterChannels() {
-            const query = searchInput.value.toLowerCase().trim();
-            const items = channelList.querySelectorAll('li');
-            let visible = 0;
+            var query = searchInput.value.toLowerCase().trim();
+            var items = channelList.querySelectorAll('li');
+            var visible = 0;
 
-            items.forEach(item => {
+            items.forEach(function(item) {
                 // Saltar headers de grupo
                 if (item.classList.contains('group-header')) {
-                    // Mostrar header solo si hay canales visibles en ese grupo
-                    const group = item.textContent.replace('📁 ', '').trim();
-                    let hasVisible = false;
-                    // Buscar canales de este grupo
-                    const siblings = item.parentElement.querySelectorAll(`li[data-group="${group}"]`);
-                    siblings.forEach(sib => {
+                    var group = item.textContent.replace('📁 ', '').trim();
+                    var hasVisible = false;
+                    var siblings = item.parentElement.querySelectorAll('li[data-group="' + group + '"]');
+                    siblings.forEach(function(sib) {
                         if (sib.style.display !== 'none') hasVisible = true;
                     });
                     item.style.display = hasVisible ? 'flex' : 'none';
                     return;
                 }
 
-                const name = (item.dataset.name || '').toLowerCase();
-                const match = !query || name.includes(query);
+                var name = (item.dataset.name || '').toLowerCase();
+                var match = !query || name.includes(query);
                 item.style.display = match ? 'flex' : 'none';
                 if (match) visible++;
             });
 
-            // Actualizar headers de grupo después de filtrar
-            const headers = channelList.querySelectorAll('.group-header');
-            headers.forEach(header => {
-                const group = header.textContent.replace('📁 ', '').trim();
-                let hasVisible = false;
-                const siblings = header.parentElement.querySelectorAll(`li[data-group="${group}"]`);
-                siblings.forEach(sib => {
+            // Actualizar headers de grupo
+            var headers = channelList.querySelectorAll('.group-header');
+            headers.forEach(function(header) {
+                var group = header.textContent.replace('📁 ', '').trim();
+                var hasVisible = false;
+                var siblings = header.parentElement.querySelectorAll('li[data-group="' + group + '"]');
+                siblings.forEach(function(sib) {
                     if (sib.style.display !== 'none') hasVisible = true;
                 });
                 header.style.display = hasVisible ? 'flex' : 'none';
             });
 
-            channelCount.textContent = `${visible} canales`;
+            channelCount.textContent = visible + ' canales';
         }
 
         function clearPlaylist() {
@@ -912,23 +904,23 @@
         function playChannel(index) {
             if (index < 0 || index >= channels.length) return;
 
-            const channel = channels[index];
+            var channel = channels[index];
             if (!channel || !channel.url) {
-                alert(`❌ El canal "${channel.name}" no tiene URL válida`);
+                alert('El canal "' + channel.name + '" no tiene URL valida');
                 return;
             }
 
             currentChannelIndex = index;
 
-            document.querySelectorAll('#channelList li[data-index]').forEach(el => {
+            document.querySelectorAll('#channelList li[data-index]').forEach(function(el) {
                 el.classList.toggle('active', parseInt(el.dataset.index) === index);
             });
 
             urlInput.value = channel.url;
             playUrl(channel.url);
 
-            setStatus(`▶ ${channel.name}`, 'online');
-            statusInfo.textContent = `Canal ${index + 1}/${channels.length} - ${channel.group}`;
+            setStatus('Reproduciendo: ' + channel.name, 'online');
+            statusInfo.textContent = 'Canal ' + (index + 1) + '/' + channels.length + ' - ' + channel.group;
         }
 
         function playUrl(url) {
@@ -959,7 +951,7 @@
 
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
                         hlsLoading.style.display = 'none';
-                        videoPlayer.play().catch(e => console.error('Error HLS:', e));
+                        videoPlayer.play().catch(function(e) { console.error('Error HLS:', e); });
                     });
 
                     hls.on(Hls.Events.ERROR, function(event, data) {
@@ -967,7 +959,7 @@
                             console.error('Error fatal HLS:', data);
                             hlsLoading.style.display = 'none';
                             setStatus('Error HLS', 'offline');
-                            alert(`❌ Error HLS: ${data.details}\n\nPrueba con otro canal.`);
+                            alert('Error HLS: ' + data.details + '\n\nPrueba con otro canal.');
                             hls.destroy();
                             hls = null;
                             playBtn.disabled = true;
@@ -981,13 +973,13 @@
                     return;
                 } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
                     videoPlayer.src = url;
-                    videoPlayer.play().catch(e => console.error('Error:', e));
+                    videoPlayer.play().catch(function(e) { console.error('Error:', e); });
                     playBtn.disabled = false;
                     stopBtn.disabled = false;
                     playBtn.textContent = '⏸';
                     return;
                 } else {
-                    alert('❌ Tu navegador no soporta HLS.');
+                    alert('Tu navegador no soporta HLS.');
                     return;
                 }
             }
@@ -996,10 +988,10 @@
             videoPlayer.src = url;
             videoPlayer.load();
 
-            const playPromise = videoPlayer.play();
+            var playPromise = videoPlayer.play();
             if (playPromise !== undefined) {
                 playPromise
-                    .then(() => {
+                    .then(function() {
                         isPlaying = true;
                         playBtn.textContent = '⏸';
                         playBtn.disabled = false;
@@ -1007,13 +999,13 @@
                         setStatus('Conectado', 'online');
                         statusInfo.textContent = 'Reproduciendo...';
                     })
-                    .catch(error => {
+                    .catch(function(error) {
                         console.error('Error:', error);
-                        setStatus(`Error: ${error.message}`, 'offline');
+                        setStatus('Error: ' + error.message, 'offline');
                         playBtn.disabled = true;
                         stopBtn.disabled = true;
                         if (!error.message.includes('NotAllowedError')) {
-                            alert(`❌ No se pudo reproducir:\n\n${error.message}`);
+                            alert('No se pudo reproducir:\n\n' + error.message);
                         } else {
                             playBtn.disabled = false;
                             playBtn.textContent = '▶';
@@ -1027,9 +1019,9 @@
         }
 
         function loadUrl() {
-            const url = urlInput.value.trim();
+            var url = urlInput.value.trim();
             if (!url) {
-                alert('Ingresa una URL válida');
+                alert('Ingresa una URL valida');
                 return;
             }
 
@@ -1045,12 +1037,12 @@
         function togglePlay() {
             if (videoPlayer.paused) {
                 videoPlayer.play()
-                    .then(() => {
+                    .then(function() {
                         isPlaying = true;
                         playBtn.textContent = '⏸';
                         setStatus('Reproduciendo', 'online');
                     })
-                    .catch(e => console.error('Error:', e));
+                    .catch(function(e) { console.error('Error:', e); });
             } else {
                 videoPlayer.pause();
                 isPlaying = false;
@@ -1076,32 +1068,32 @@
             playBtn.textContent = '▶';
             isPlaying = false;
             setStatus('Detenido', 'offline');
-            statusInfo.textContent = 'Reproducción detenida';
+            statusInfo.textContent = 'Reproduccion detenida';
             timeDisplay.textContent = '00:00:00';
 
-            document.querySelectorAll('#channelList li[data-index]').forEach(el => {
+            document.querySelectorAll('#channelList li[data-index]').forEach(function(el) {
                 el.classList.remove('active');
             });
             currentChannelIndex = -1;
         }
 
         function toggleFullscreen() {
-            const container = videoContainer;
+            var container = videoContainer;
             if (!document.fullscreenElement) {
                 (container.requestFullscreen || container.webkitRequestFullscreen)
                     .call(container)
-                    .catch(e => console.error('Error fullscreen:', e));
+                    .catch(function(e) { console.error('Error fullscreen:', e); });
             } else {
                 (document.exitFullscreen || document.webkitExitFullscreen)
                     .call(document)
-                    .catch(e => console.error('Error exit fullscreen:', e));
+                    .catch(function(e) { console.error('Error exit fullscreen:', e); });
             }
         }
 
         function setVolume(value) {
-            const vol = parseInt(value);
+            var vol = parseInt(value);
             videoPlayer.volume = vol / 100;
-            volumeLabel.textContent = `${vol}%`;
+            volumeLabel.textContent = vol + '%';
         }
 
         // ============================================================
@@ -1109,20 +1101,20 @@
         // ============================================================
 
         function updateTimeDisplay() {
-            const current = formatTime(videoPlayer.currentTime);
-            const duration = formatTime(videoPlayer.duration || 0);
+            var current = formatTime(videoPlayer.currentTime);
+            var duration = formatTime(videoPlayer.duration || 0);
             timeDisplay.textContent = current;
         }
 
         function formatTime(seconds) {
             if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) return '00:00:00';
-            const h = Math.floor(seconds / 3600);
-            const m = Math.floor((seconds % 3600) / 60);
-            const s = Math.floor(seconds % 60);
+            var h = Math.floor(seconds / 3600);
+            var m = Math.floor((seconds % 3600) / 60);
+            var s = Math.floor(seconds % 60);
             if (h > 0) {
-                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
             }
-            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
         }
 
         function onVideoPlay() {
@@ -1161,8 +1153,8 @@
         }
 
         function onVideoError(e) {
-            const error = videoPlayer.error;
-            let message = 'Error desconocido';
+            var error = videoPlayer.error;
+            var message = 'Error desconocido';
 
             if (error) {
                 switch (error.code) {
@@ -1170,10 +1162,10 @@
                         message = 'Carga abortada';
                         break;
                     case 2:
-                        message = 'Error de red - Verifica tu conexión';
+                        message = 'Error de red - Verifica tu conexion';
                         break;
                     case 3:
-                        message = 'Error de decodificación';
+                        message = 'Error de decodificacion';
                         break;
                     case 4:
                         message = 'Formato no soportado';
@@ -1184,14 +1176,14 @@
             }
 
             console.error('Error de video:', message);
-            setStatus(`Error: ${message}`, 'offline');
-            statusInfo.textContent = 'Error de reproducción';
+            setStatus('Error: ' + message, 'offline');
+            statusInfo.textContent = 'Error de reproduccion';
             playBtn.disabled = true;
             stopBtn.disabled = true;
             hlsLoading.style.display = 'none';
 
             if (message.includes('red') || message.includes('network')) {
-                alert(`⚠️ Error de red:\n\n${message}\n\nVerifica tu conexión a internet.`);
+                alert('Error de red:\n\n' + message + '\n\nVerifica tu conexion a internet.');
             }
         }
 
@@ -1216,7 +1208,7 @@
         // ============================================================
 
         function setupDragAndDrop() {
-            const container = document.getElementById('app');
+            var container = document.getElementById('app');
 
             document.addEventListener('dragover', function(e) {
                 e.preventDefault();
@@ -1232,17 +1224,17 @@
                 e.preventDefault();
                 container.classList.remove('drop-highlight');
 
-                const files = e.dataTransfer.files;
+                var files = e.dataTransfer.files;
                 if (files.length > 0) {
-                    const file = files[0];
+                    var file = files[0];
                     if (file.name.endsWith('.m3u') || file.name.endsWith('.m3u8') || file.name.endsWith('.txt')) {
-                        const reader = new FileReader();
+                        var reader = new FileReader();
                         reader.onload = function(e) {
-                            const data = e.target.result;
+                            var data = e.target.result;
                             channels = parseM3U(data);
                             renderChannels();
-                            setStatus(`Lista cargada: ${channels.length} canales`, 'online');
-                            statusInfo.textContent = `Archivo: ${file.name}`;
+                            setStatus('Lista cargada: ' + channels.length + ' canales', 'online');
+                            statusInfo.textContent = 'Archivo: ' + file.name;
                             urlInput.value = file.name;
                         };
                         reader.readAsText(file);
@@ -1250,7 +1242,7 @@
                     }
                 }
 
-                const text = e.dataTransfer.getData('text/plain');
+                var text = e.dataTransfer.getData('text/plain');
                 if (text && (text.startsWith('http://') || text.startsWith('https://'))) {
                     urlInput.value = text;
                     loadUrl();
@@ -1270,11 +1262,11 @@
                 }
                 if (e.code === 'KeyF') toggleFullscreen();
                 if (e.code === 'KeyM') {
-                    const vol = videoPlayer.volume > 0 ? 0 : 80 / 100;
+                    var vol = videoPlayer.volume > 0 ? 0 : 80 / 100;
                     videoPlayer.volume = vol;
-                    const value = Math.round(vol * 100);
+                    var value = Math.round(vol * 100);
                     volumeSlider.value = value;
-                    volumeLabel.textContent = `${value}%`;
+                    volumeLabel.textContent = value + '%';
                 }
             }
 
@@ -1288,7 +1280,7 @@
             }
         });
 
-        console.log('📺 IPTV Player - Atajos de teclado:');
+        console.log('IPTV Player - Atajos de teclado:');
         console.log('  [Espacio]  Play/Pause');
         console.log('  [F]        Pantalla completa');
         console.log('  [M]        Silenciar');
