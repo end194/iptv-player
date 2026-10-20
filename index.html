@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- CSP básica para producción (ajusta según tus necesidades) -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; media-src * blob:; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'unsafe-inline'; connect-src *;">
+    <!-- CSP permisiva para medios y HLS -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; media-src * blob: data:; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'unsafe-inline'; connect-src *; img-src * data:;">
     <title>IPTV Player - Canales Gratis</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* ... (todos tus estilos originales se mantienen sin cambios) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0d0d0d; color: #e0e0e0; height: 100vh; overflow: hidden; user-select: none; }
         .app-container { display: flex; height: 100vh; background: #0d0d0d; }
@@ -119,7 +118,7 @@
             </div>
             <div class="sidebar-footer">
                 <span class="count" id="channelCount">0 canales</span>
-                <span>v2.1</span>
+                <span>v2.2</span>
             </div>
         </aside>
 
@@ -130,8 +129,10 @@
                     <h3>Selecciona un canal</h3>
                     <p>Haz clic en un canal de la lista o ingresa una URL</p>
                     <div class="hint">
-                        Arrastra un archivo .m3u para cargar canales
+                        Arrastra un archivo .m3u para cargar canales<br>
+                        <small style="color:#555;">Si los canales HLS fallan, prueba con el botón "Probar MP4"</small>
                     </div>
+                    <button onclick="testPlayer()" style="margin-top:16px; padding:8px 20px; background:#0077b6; border:none; border-radius:4px; color:white; cursor:pointer;">▶ Probar MP4</button>
                 </div>
                 <video id="videoPlayer" style="display:none;" controls></video>
                 <div class="hls-loading" id="hlsLoading">Cargando stream HLS...</div>
@@ -167,19 +168,36 @@
         // ============================================================
         // CONFIGURACIÓN
         // ============================================================
-        // Proxy SOLO para listas M3U (no para streams de video)
-        // Se recomienda usar un proxy propio (Cloudflare Worker) para producción.
+        // ⚠️ IMPORTANTE: Reemplaza esta URL con tu propio Cloudflare Worker
+        // Ejemplo de Worker (código mínimo):
+        // addEventListener('fetch', e => e.respondWith(handle(e.request)))
+        // async function handle(req) {
+        //   const url = new URL(req.url).searchParams.get('url');
+        //   if (!url) return new Response('Missing url', {status:400});
+        //   const res = await fetch(url, {headers: {'User-Agent':'Mozilla/5.0'}});
+        //   const newHeaders = new Headers(res.headers);
+        //   newHeaders.set('Access-Control-Allow-Origin', '*');
+        //   // Reescribir segmentos .ts relativos (opcional, depende del stream)
+        //   return new Response(res.body, {status: res.status, headers: newHeaders});
+        // }
+        var HLS_PROXY = 'https://cors-anywhere.herokuapp.com/'; // Reemplaza por tu Worker
         var CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
+        // Canales por defecto: mezcla de MP4 (seguros), HLS de prueba y algunos canales públicos
         var DEFAULT_CHANNELS = [
-            { name: 'Apple Test Stream', group: 'Prueba', url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8' },
-            { name: 'Mux Test Stream', group: 'Prueba', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+            // Videos de prueba (siempre funcionan)
+            { name: 'Big Buck Bunny (MP4)', group: 'Prueba', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
+            { name: 'For Bigger Blazes (MP4)', group: 'Prueba', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
+            { name: 'Apple Test HLS', group: 'Prueba', url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8' },
+            { name: 'Mux Test HLS', group: 'Prueba', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+            // Noticias (pueden fallar por CORS, pero son más estables)
             { name: 'CGTN News', group: 'Noticias', url: 'https://cgtn-live.cgtn.com/1000e/program/cgtn.m3u8' },
             { name: 'Al Jazeera English', group: 'Noticias', url: 'https://live-hls-web-aje.getaj.net/AJE/01.m3u8' },
+            // Música (MP3 directo)
             { name: 'SomaFM Groove Salad', group: 'Musica', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
             { name: 'SomaFM Drone Zone', group: 'Musica', url: 'https://ice1.somafm.com/dronezone-128-mp3' },
-            { name: 'Big Buck Bunny (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
-            { name: 'For Bigger Blazes (MP4)', group: 'Videos', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
+            // Deportes (enlaces de ejemplo, pueden requerir proxy)
+            { name: 'Fútbol: LaLiga (ejemplo)', group: 'Deportes', url: 'https://example.com/laliga.m3u8' },
         ];
 
         var PUBLIC_PLAYLISTS = {
@@ -188,12 +206,17 @@
             'Deportes': 'https://iptv-org.github.io/iptv/categories/sports.m3u',
             'Cine': 'https://iptv-org.github.io/iptv/categories/movies.m3u',
             'General': 'https://iptv-org.github.io/iptv/categories/general.m3u',
+            'España': 'https://iptv-org.github.io/iptv/countries/es.m3u',
+            'México': 'https://iptv-org.github.io/iptv/countries/mx.m3u',
+            'Argentina': 'https://iptv-org.github.io/iptv/countries/ar.m3u',
         };
 
         var channels = [];
         var currentChannelIndex = -1;
         var isPlaying = false;
         var hls = null;
+        var hlsRetryCount = 0;
+        var MAX_HLS_RETRIES = 2;
 
         // DOM refs
         var videoPlayer = document.getElementById('videoPlayer');
@@ -242,7 +265,7 @@
             videoPlayer.volume = 80 / 100;
             volumeLabel.textContent = '80%';
 
-            console.log('IPTV Player v2.1 cargado');
+            console.log('IPTV Player v2.2 cargado');
         });
 
         // ============================================================
@@ -311,7 +334,11 @@
                     channels = parsed;
                     renderChannels();
                     setStatus('Lista cargada: ' + channels.length + ' canales', 'online');
-                    statusInfo.textContent = 'Lista desde ' + new URL(url).hostname;
+                    try {
+                        statusInfo.textContent = 'Lista desde ' + new URL(url).hostname;
+                    } catch(e) {
+                        statusInfo.textContent = 'Lista cargada';
+                    }
                     urlInput.value = url;
                 })
                 .catch(function(error) {
@@ -384,7 +411,6 @@
                     li.dataset.index = idx;
                     li.dataset.name = channel.name.toLowerCase();
                     li.dataset.group = group;
-                    // Usar escapeHtml para prevenir XSS
                     li.innerHTML =
                         '<span class="indicator"></span>' +
                         '<span class="channel-number">' + (idx + 1) + '</span>' +
@@ -413,7 +439,6 @@
                 if (match) visible++;
             });
 
-            // Mostrar/ocultar cabeceras de grupo según sus items visibles
             channelList.querySelectorAll('.group-header').forEach(function(header) {
                 var group = header.dataset.group;
                 var hasVisible = false;
@@ -437,7 +462,7 @@
         }
 
         // ============================================================
-        // REPRODUCCIÓN (CORREGIDA)
+        // REPRODUCCIÓN
         // ============================================================
 
         function playChannel(index) {
@@ -446,6 +471,12 @@
             var channel = channels[index];
             if (!channel || !channel.url) {
                 alert('El canal "' + channel.name + '" no tiene URL valida');
+                return;
+            }
+
+            // Si es un canal de ejemplo (placeholder), avisar
+            if (channel.url.includes('example.com')) {
+                alert('Este es un canal de ejemplo sin stream real.\n\nUsa "Probar MP4" o carga una lista M3U real.');
                 return;
             }
 
@@ -466,15 +497,17 @@
             if (!url) return;
 
             // Limpiar instancia HLS anterior
-            if (hls) {
-                hls.off(Hls.Events.MANIFEST_PARSED);
-                hls.off(Hls.Events.ERROR);
-                hls.destroy();
-                hls = null;
-            }
+            destroyHls();
 
             videoPlayer.style.display = 'block';
             placeholder.style.display = 'none';
+            hlsLoading.style.display = 'none';
+            hlsRetryCount = 0;
+
+            // Resetear botones
+            playBtn.disabled = true;
+            stopBtn.disabled = true;
+            playBtn.textContent = '▶';
 
             var cleanUrl = url.split('?')[0].toLowerCase();
             var isDirectMedia = /\.(mp3|mp4|webm|ogg|m4a)$/.test(cleanUrl);
@@ -497,13 +530,24 @@
                         enableWorker: true,
                         lowLatencyMode: true,
                         maxBufferLength: 30,
-                        manifestLoadingTimeOut: 10000,
+                        manifestLoadingTimeOut: 15000,
                         manifestLoadingMaxRetry: 2,
+                        levelLoadingMaxRetry: 2,
+                        fragLoadingMaxRetry: 2,
                     });
 
-                    // CORRECCIÓN CRÍTICA: Intentar URL directa primero.
-                    // El proxy CORS rompe el streaming de segmentos.
-                    hls.loadSource(url);
+                    // Intenta cargar directamente (si CORS lo permite) o mediante proxy
+                    var useProxy = !url.startsWith('https://devstreaming-cdn.apple.com') &&
+                                   !url.startsWith('https://test-streams.mux.dev');
+                    var finalUrl = useProxy ? (HLS_PROXY + encodeURIComponent(url)) : url;
+
+                    try {
+                        hls.loadSource(finalUrl);
+                    } catch(e) {
+                        console.error('Error loadSource:', e);
+                        // Fallback a URL directa
+                        hls.loadSource(url);
+                    }
                     hls.attachMedia(videoPlayer);
 
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
@@ -518,23 +562,36 @@
 
                             switch (data.type) {
                                 case Hls.ErrorTypes.NETWORK_ERROR:
-                                    setStatus('Reintentando red...', 'loading');
-                                    // Reintento simple
-                                    setTimeout(function() {
-                                        if (hls) hls.startLoad();
-                                    }, 2000);
+                                    if (hlsRetryCount < MAX_HLS_RETRIES) {
+                                        hlsRetryCount++;
+                                        setStatus('Reintentando (' + hlsRetryCount + '/' + MAX_HLS_RETRIES + ')...', 'loading');
+                                        setTimeout(function() {
+                                            if (hls) hls.startLoad();
+                                        }, 1500 * hlsRetryCount);
+                                    } else {
+                                        setStatus('Error de red: no se pudo cargar', 'offline');
+                                        statusInfo.textContent = 'Prueba con otro canal o usa un proxy CORS';
+                                        destroyHls();
+                                        showPlaceholderError('No se pudo cargar el stream. Posible bloqueo CORS o canal caído.');
+                                    }
                                     break;
                                 case Hls.ErrorTypes.MEDIA_ERROR:
-                                    setStatus('Recuperando media...', 'loading');
-                                    hls.recoverMediaError();
+                                    if (hlsRetryCount < MAX_HLS_RETRIES) {
+                                        hlsRetryCount++;
+                                        setStatus('Recuperando media...', 'loading');
+                                        hls.recoverMediaError();
+                                    } else {
+                                        setStatus('Error de media', 'offline');
+                                        statusInfo.textContent = 'Códec no soportado o stream corrupto';
+                                        destroyHls();
+                                        showPlaceholderError('Error de decodificación. El canal puede usar H.265/HEVC no soportado por el navegador.');
+                                    }
                                     break;
                                 default:
                                     setStatus('Error HLS fatal', 'offline');
-                                    alert('Error HLS: ' + data.details + '\n\nPrueba con otro canal.');
-                                    hls.destroy();
-                                    hls = null;
-                                    playBtn.disabled = true;
-                                    stopBtn.disabled = true;
+                                    statusInfo.textContent = data.details || 'Error desconocido';
+                                    destroyHls();
+                                    showPlaceholderError('Error HLS: ' + (data.details || 'desconocido'));
                             }
                         }
                     });
@@ -544,12 +601,12 @@
                     playBtn.textContent = '⏸';
                     return;
                 } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                    // Safari nativo (no usa proxy, reproduce directo)
+                    // Safari nativo
                     videoPlayer.src = url;
                     attemptPlay();
                     return;
                 } else {
-                    alert('Tu navegador no soporta HLS.');
+                    alert('Tu navegador no soporta HLS. Usa Chrome, Firefox o Edge actualizado.');
                     return;
                 }
             }
@@ -571,15 +628,47 @@
                     setStatus('Conectado', 'online');
                 }).catch(function(error) {
                     console.error('Error play:', error);
-                    setStatus('Error: ' + error.message, 'offline');
-                    playBtn.disabled = true;
-                    stopBtn.disabled = true;
-                    // No alertar por NotAllowedError (autoplay bloqueado)
-                    if (error.name !== 'NotAllowedError') {
+                    if (error.name === 'NotAllowedError') {
+                        setStatus('Autoplay bloqueado', 'loading');
                         statusInfo.textContent = 'Haz clic en ▶ para reproducir';
+                        playBtn.disabled = false;
+                        playBtn.textContent = '▶';
+                    } else {
+                        setStatus('Error: ' + error.message, 'offline');
+                        statusInfo.textContent = 'No se pudo iniciar la reproducción';
                     }
                 });
             }
+        }
+
+        function destroyHls() {
+            if (hls) {
+                try {
+                    hls.off(Hls.Events.MANIFEST_PARSED);
+                    hls.off(Hls.Events.ERROR);
+                    hls.destroy();
+                } catch(e) { /* ignore */ }
+                hls = null;
+            }
+        }
+
+        function showPlaceholderError(msg) {
+            videoPlayer.style.display = 'none';
+            placeholder.style.display = 'flex';
+            placeholder.innerHTML =
+                '<div class="icon">⚠️</div>' +
+                '<h3>No se pudo reproducir</h3>' +
+                '<p style="max-width:400px; margin:0 auto;">' + escapeHtml(msg) + '</p>' +
+                '<div class="hint" style="margin-top:16px;">' +
+                'Prueba con:<br>• El botón "Probar MP4"<br>• Otro canal de la lista<br>• Cargar una lista M3U diferente' +
+                '</div>' +
+                '<button onclick="testPlayer()" style="margin-top:16px; padding:8px 20px; background:#0077b6; border:none; border-radius:4px; color:white; cursor:pointer;">▶ Probar MP4</button>';
+        }
+
+        function testPlayer() {
+            playUrl('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+            setStatus('Reproduciendo video de prueba', 'online');
+            statusInfo.textContent = 'Si esto funciona, el reproductor está OK';
         }
 
         function loadUrl() {
@@ -616,12 +705,7 @@
         }
 
         function stopVideo() {
-            if (hls) {
-                hls.off(Hls.Events.MANIFEST_PARSED);
-                hls.off(Hls.Events.ERROR);
-                hls.destroy();
-                hls = null;
-            }
+            destroyHls();
 
             videoPlayer.pause();
             videoPlayer.currentTime = 0;
@@ -636,6 +720,7 @@
             setStatus('Detenido', 'offline');
             statusInfo.textContent = 'Reproduccion detenida';
             timeDisplay.textContent = '00:00:00';
+            hlsRetryCount = 0;
 
             document.querySelectorAll('#channelList li[data-index]').forEach(function(el) {
                 el.classList.remove('active');
@@ -662,7 +747,7 @@
         }
 
         // ============================================================
-        // EVENTOS DE VIDEO (SIN ALERTS MOLESTOS)
+        // EVENTOS DE VIDEO
         // ============================================================
         function updateTimeDisplay() {
             timeDisplay.textContent = formatTime(videoPlayer.currentTime);
@@ -723,10 +808,7 @@
             console.error('Error de video:', message);
             setStatus('Error: ' + message, 'offline');
             statusInfo.textContent = 'Error de reproduccion';
-            playBtn.disabled = true;
-            stopBtn.disabled = true;
             hlsLoading.style.display = 'none';
-            // Ya NO se muestra alert() para errores de red
         }
 
         // ============================================================
