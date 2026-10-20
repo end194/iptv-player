@@ -118,7 +118,7 @@
             </div>
             <div class="sidebar-footer">
                 <span class="count" id="channelCount">0 canales</span>
-                <span>v2.2</span>
+                <span>v2.3</span>
             </div>
         </aside>
 
@@ -168,19 +168,9 @@
         // ============================================================
         // CONFIGURACIÓN
         // ============================================================
-        // ⚠️ IMPORTANTE: Reemplaza esta URL con tu propio Cloudflare Worker
-        // Ejemplo de Worker (código mínimo):
-        // addEventListener('fetch', e => e.respondWith(handle(e.request)))
-        // async function handle(req) {
-        //   const url = new URL(req.url).searchParams.get('url');
-        //   if (!url) return new Response('Missing url', {status:400});
-        //   const res = await fetch(url, {headers: {'User-Agent':'Mozilla/5.0'}});
-        //   const newHeaders = new Headers(res.headers);
-        //   newHeaders.set('Access-Control-Allow-Origin', '*');
-        //   // Reescribir segmentos .ts relativos (opcional, depende del stream)
-        //   return new Response(res.body, {status: res.status, headers: newHeaders});
-        // }
-        var HLS_PROXY = 'https://cors-anywhere.herokuapp.com/'; // Reemplaza por tu Worker
+        // ✅ Tu proxy Cloudflare Worker (ya desplegado y funcionando)
+        var HLS_PROXY = 'https://iptv-proxy.vazquezdenny194.workers.dev/?url=';
+        // Proxy para listas M3U (texto plano)
         var CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
         // Canales por defecto: mezcla de MP4 (seguros), HLS de prueba y algunos canales públicos
@@ -196,8 +186,6 @@
             // Música (MP3 directo)
             { name: 'SomaFM Groove Salad', group: 'Musica', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
             { name: 'SomaFM Drone Zone', group: 'Musica', url: 'https://ice1.somafm.com/dronezone-128-mp3' },
-            // Deportes (enlaces de ejemplo, pueden requerir proxy)
-            { name: 'Fútbol: LaLiga (ejemplo)', group: 'Deportes', url: 'https://example.com/laliga.m3u8' },
         ];
 
         var PUBLIC_PLAYLISTS = {
@@ -265,7 +253,7 @@
             videoPlayer.volume = 80 / 100;
             volumeLabel.textContent = '80%';
 
-            console.log('IPTV Player v2.2 cargado');
+            console.log('IPTV Player v2.3 cargado — Proxy:', HLS_PROXY);
         });
 
         // ============================================================
@@ -474,12 +462,6 @@
                 return;
             }
 
-            // Si es un canal de ejemplo (placeholder), avisar
-            if (channel.url.includes('example.com')) {
-                alert('Este es un canal de ejemplo sin stream real.\n\nUsa "Probar MP4" o carga una lista M3U real.');
-                return;
-            }
-
             currentChannelIndex = index;
 
             document.querySelectorAll('#channelList li[data-index]').forEach(function(el) {
@@ -536,17 +518,17 @@
                         fragLoadingMaxRetry: 2,
                     });
 
-                    // Intenta cargar directamente (si CORS lo permite) o mediante proxy
-                    var useProxy = !url.startsWith('https://devstreaming-cdn.apple.com') &&
-                                   !url.startsWith('https://test-streams.mux.dev');
-                    var finalUrl = useProxy ? (HLS_PROXY + encodeURIComponent(url)) : url;
+                    // ✅ SIEMPRE usar el proxy para HLS (evita CORS y Referer)
+                    var proxiedUrl = HLS_PROXY + encodeURIComponent(url);
+
+                    console.log('Cargando HLS vía proxy:', proxiedUrl);
 
                     try {
-                        hls.loadSource(finalUrl);
+                        hls.loadSource(proxiedUrl);
                     } catch(e) {
                         console.error('Error loadSource:', e);
-                        // Fallback a URL directa
-                        hls.loadSource(url);
+                        // Fallback a URL directa si el proxy falla catastróficamente
+                        try { hls.loadSource(url); } catch(e2) { console.error('Error fallback:', e2); }
                     }
                     hls.attachMedia(videoPlayer);
 
@@ -570,9 +552,9 @@
                                         }, 1500 * hlsRetryCount);
                                     } else {
                                         setStatus('Error de red: no se pudo cargar', 'offline');
-                                        statusInfo.textContent = 'Prueba con otro canal o usa un proxy CORS';
+                                        statusInfo.textContent = 'Canal caído o bloqueado. Prueba otro.';
                                         destroyHls();
-                                        showPlaceholderError('No se pudo cargar el stream. Posible bloqueo CORS o canal caído.');
+                                        showPlaceholderError('No se pudo cargar el stream. Posible canal caído o bloqueo del servidor de origen.');
                                     }
                                     break;
                                 case Hls.ErrorTypes.MEDIA_ERROR:
@@ -601,7 +583,7 @@
                     playBtn.textContent = '⏸';
                     return;
                 } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                    // Safari nativo
+                    // Safari nativo (no necesita proxy porque Safari no aplica CORS igual)
                     videoPlayer.src = url;
                     attemptPlay();
                     return;
